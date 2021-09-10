@@ -40,9 +40,10 @@ class Audio(WeekSetup):
         for code_dir, files in code_base.items():
             os.mkdir(os.path.join('week03', code_dir))
             for filename in files:
-                path = os.path.join('week03', code_dir, filename)
-                download_github_code(path)
-                os.rename(filename, path)
+                github_path = os.path.join('week03-dl-audio', code_dir, filename)
+                local_path = os.path.join('week03', code_dir, filename)
+                download_github_code(github_path)
+                os.rename(filename, local_path)
 
         download_github_code(os.path.join('week03', 'data', 'audio-dataset.zip'))
 
