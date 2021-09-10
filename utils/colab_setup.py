@@ -1,4 +1,5 @@
 import os
+import shutil
 from zipfile import ZipFile
 from abc import ABC
 from abc import abstractmethod
@@ -31,7 +32,7 @@ class Audio(WeekSetup):
     def __init__(self):
         super().__init__()
         if os.path.isdir('week03'):
-            os.rmdir('week03')
+            shutil.rmtree('week03')
 
         os.mkdir('week03')
         code_base = {'asr': ['alphabet.py', 'metrics.py', 'model.py'],
