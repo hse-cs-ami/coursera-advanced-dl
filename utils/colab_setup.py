@@ -53,7 +53,7 @@ class Audio(WeekSetup):
                 download_github_code(github_path)
                 os.rename(filename, local_path)
 
-        download_github_raw(os.path.join('week03', 'data', 'audio-dataset.zip'))
+        download_github_raw(os.path.join('week03-dl-audio', 'data', 'audio-dataset.zip'))
 
     def setup(self):
         os.system('pip install torchaudio editdistance')
