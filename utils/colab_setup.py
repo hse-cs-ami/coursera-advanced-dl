@@ -19,6 +19,13 @@ def download_github_release(path):
         'wget -q https://github.com/hse-cs-ami/coursera-advanced-dl/releases/download/{} -O {}'.format(path, filename))
 
 
+def download_github_raw(path):
+    filename = path.rsplit('/')[-1]
+    os.system('shred -u {}'.format(filename))
+    os.system(
+        'https://github.com/hse-cs-ami/coursera-advanced-dl/blob/main/{}?raw=true -O {}'.format(path, filename))
+
+
 class WeekSetup(ABC):
     def __init__(self):
         download_github_code('utils/testing.py')
@@ -46,7 +53,7 @@ class Audio(WeekSetup):
                 download_github_code(github_path)
                 os.rename(filename, local_path)
 
-        download_github_code(os.path.join('week03', 'data', 'audio-dataset.zip'))
+        download_github_raw(os.path.join('week03', 'data', 'audio-dataset.zip'))
 
     def setup(self):
         os.system('pip install torchaudio editdistance')
