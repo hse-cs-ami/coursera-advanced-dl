@@ -59,7 +59,7 @@ class Audio(WeekSetup):
     def setup(self):
         os.system('pip install torchaudio editdistance')
         if os.path.isdir('audio-dataset'):
-            os.remove('audio-dataset')
+            shutil.rmtree('audio-dataset')
 
         with ZipFile('audio-dataset.zip', 'r') as zip_ref:
             zip_ref.extractall()
