@@ -54,8 +54,19 @@ class Audio(WeekSetup):
                 os.rename(filename, local_path)
 
         download_github_raw(os.path.join('week03-dl-audio', 'data', 'audio-dataset.zip'))
+        download_github_raw(os.path.join('week03-dl-audio', 'data', 'asr-model.pt.zip'))
 
     def setup(self):
         os.system('pip install torchaudio editdistance')
+        if os.path.isdir('audio-dataset'):
+            os.remove('audio-dataset')
+
         with ZipFile('audio-dataset.zip', 'r') as zip_ref:
             zip_ref.extractall()
+        os.remove('audio-dataset.zip')
+
+        if os.path.isfile('asr-model.pt'):
+            os.remove('asr-model.pt')
+        with ZipFile('asr-model.pt.zip', 'r') as zip_ref:
+            zip_ref.extractall()
+        os.remove('asr-model.pt.zip')

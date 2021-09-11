@@ -1,0 +1,147 @@
+import torch
+from torch import nn
+
+
+class BasicBlock(nn.Module):
+    def __init__(self, num_cells=5, kernel_size=33, in_channels=256,
+                 out_channels=256, dropout_rate=0.25,
+                 norm_layer=None, activation=None):
+        super().__init__()
+
+        self.num_cells = num_cells
+        self.kernel_size = kernel_size
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+
+        # padding = 'same' for stride = 1, dilation = 1
+        self.padding = (self.kernel_size - 1) // 2
+
+        self.norm_layer = nn.BatchNorm1d if norm_layer is None else norm_layer
+        self.activation = nn.ReLU if activation is None else activation
+
+        def build_cell(in_channels, out_channels):
+            return nn.Sequential(
+                # 1D Depthwise Convolution
+                nn.Conv1d(in_channels=in_channels, out_channels=in_channels,
+                          kernel_size=self.kernel_size, padding=self.padding,
+                          groups=in_channels),
+                # Pointwise Convolution
+                nn.Conv1d(in_channels=in_channels, out_channels=out_channels,
+                          kernel_size=1),
+                # Normalization
+                self.norm_layer(num_features=out_channels),
+            )
+
+        self.cells = [build_cell(self.in_channels, self.out_channels)]
+        for i in range(1, self.num_cells):
+            self.cells.append(self.activation())
+            self.cells.append(nn.Dropout(p=dropout_rate))
+            self.cells.append(build_cell(self.out_channels, self.out_channels))
+        self.cells = nn.Sequential(*self.cells)
+
+        # Skip connection
+        self.residual = nn.Sequential(
+            # Pointwise Convolution
+            nn.Conv1d(in_channels=in_channels, out_channels=out_channels,
+                      kernel_size=1),
+            # Normalization
+            self.norm_layer(num_features=out_channels),
+        )
+        self.activation = self.activation()
+        self.dropout = nn.Dropout(p=dropout_rate)
+
+    def forward(self, inputs):
+        outputs = inputs
+        outputs = self.cells(outputs)
+        outputs = self.activation(outputs + self.residual(inputs))
+        outputs = self.dropout(outputs)
+        return outputs
+
+
+class ASRModel(nn.Module):
+    """
+    Automatic speech recognition model based on
+    https://arxiv.org/abs/1910.10261
+    """
+    def __init__(self, num_labels, num_blocks=5, num_cells=5, num_mels=128,
+                 input_kernel=33, input_channels=256,
+                 head_kernel=87, head_channels=512,
+                 block_kernels=(33, 39, 51, 63, 75),
+                 block_channels=(256, 256, 256, 512, 512),
+                 dropout_rate=0.25, norm_layer=None, activation=None):
+        super().__init__()
+
+        self.norm_layer = nn.BatchNorm1d if norm_layer is None else norm_layer
+        self.activation = nn.ReLU if activation is None else activation
+        self.num_blocks = num_blocks
+        self.num_cells = num_cells
+        self.num_labels = num_labels
+
+        # padding to reduce time frames (T) -> (T / 2)
+        input_padding = (input_kernel - 1) // 2
+        self.input = nn.Sequential(
+            # C1 Block: Conv-BN-ReLU
+            nn.Conv1d(in_channels=num_mels, out_channels=num_mels,
+                      kernel_size=input_kernel, stride=2,
+                      padding=input_padding, groups=num_mels),
+            nn.Conv1d(in_channels=num_mels, out_channels=input_channels,
+                      kernel_size=1),
+            self.norm_layer(num_features=input_channels),
+            self.activation(),
+            nn.Dropout(p=dropout_rate)
+        )
+
+        in_channels = input_channels
+        self.blocks = []
+        self.residuals = []
+        for i in range(self.num_blocks):
+            self.blocks.append(
+                BasicBlock(num_cells=self.num_cells, kernel_size=block_kernels[i],
+                           in_channels=in_channels, out_channels=block_channels[i],
+                           dropout_rate=dropout_rate, norm_layer=self.norm_layer, activation=self.activation)
+            )
+            self.residuals.append(
+                nn.Conv1d(in_channels=in_channels, out_channels=block_channels[i], kernel_size=1)
+            )
+            in_channels = block_channels[i]
+        self.blocks = nn.ModuleList(self.blocks)
+        self.residuals = nn.ModuleList(self.residuals)
+
+        # padding = 'same' for stride = 1, dilation = 2
+        head_padding = head_kernel - 1
+        self.head = nn.Sequential(
+            # C2 Block: Conv-BN-ReLU
+            nn.Conv1d(in_channels=in_channels, out_channels=in_channels,
+                      kernel_size=head_kernel, dilation=2,
+                      padding=head_padding, groups=in_channels),
+            nn.Conv1d(in_channels=in_channels, out_channels=head_channels,
+                      kernel_size=1),
+            self.norm_layer(num_features=head_channels),
+            self.activation(),
+            nn.Dropout(p=dropout_rate),
+            # C3 Block: Conv-BN-ReLU
+            nn.Conv1d(in_channels=head_channels, out_channels=2 * head_channels,
+                      kernel_size=1),
+            self.norm_layer(num_features=2 * head_channels),
+            self.activation(),
+            nn.Dropout(p=dropout_rate),
+            # C4 Block: Pointwise Convolution
+            nn.Conv1d(in_channels=2 * head_channels, out_channels=num_labels,
+                      kernel_size=1)
+        )
+
+    def forward(self, inputs):
+        outputs = self.input(inputs)
+        for block, residual in zip(self.blocks, self.residuals):
+            outputs = block(outputs) + residual(outputs)
+        outputs = self.head(outputs)
+        return outputs
+
+
+def get_asr_model(filename):
+    asr_model = ASRModel(num_labels=34, num_mels=64, num_blocks=5, num_cells=5, dropout_rate=0.2,
+                         input_kernel=33, input_channels=256, head_kernel=87, head_channels=512,
+                         block_kernels=(33, 39, 51, 63, 75), block_channels=(256, 256, 256, 512, 512))
+    ckpt = torch.load(filename)
+    asr_model.load_state_dict(ckpt['model'])
+    return asr_model
