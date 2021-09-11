@@ -142,6 +142,6 @@ def get_asr_model(filename):
     asr_model = ASRModel(num_labels=34, num_mels=64, num_blocks=5, num_cells=5, dropout_rate=0.2,
                          input_kernel=33, input_channels=256, head_kernel=87, head_channels=512,
                          block_kernels=(33, 39, 51, 63, 75), block_channels=(256, 256, 256, 512, 512))
-    ckpt = torch.load(filename)
+    ckpt = torch.load(filename, map_location=torch.device('cpu'))
     asr_model.load_state_dict(ckpt['model'])
     return asr_model
