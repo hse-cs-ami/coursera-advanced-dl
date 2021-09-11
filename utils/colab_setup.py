@@ -23,7 +23,7 @@ def download_github_raw(path):
     filename = path.rsplit('/')[-1]
     os.system('shred -u {}'.format(filename))
     os.system(
-        'https://github.com/hse-cs-ami/coursera-advanced-dl/blob/main/{}?raw=true -O {}'.format(path, filename))
+        'wget -q https://github.com/hse-cs-ami/coursera-advanced-dl/blob/main/{}?raw=true -O {}'.format(path, filename))
 
 
 class WeekSetup(ABC):
