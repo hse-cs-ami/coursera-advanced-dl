@@ -43,7 +43,7 @@ class Audio(WeekSetup):
 
         os.mkdir('week03')
         code_base = {'asr': ['alphabet.py', 'metrics.py', 'model.py'],
-                     'cls': ['dataset.py']}
+                     'cls': ['dataset.py', 'record.py', 'assistant.py']}
 
         for code_dir, files in code_base.items():
             os.mkdir(os.path.join('week03', code_dir))
@@ -57,7 +57,7 @@ class Audio(WeekSetup):
         download_github_raw(os.path.join('week03-dl-audio', 'data', 'asr-model.pt.zip'))
 
     def setup(self):
-        os.system('pip install torchaudio editdistance')
+        os.system('pip install torchaudio editdistance note_seq')
         if os.path.isdir('audio-dataset'):
             shutil.rmtree('audio-dataset')
 
