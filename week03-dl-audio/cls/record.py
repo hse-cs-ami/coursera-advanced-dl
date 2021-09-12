@@ -1,4 +1,5 @@
 import base64
+import torch
 from google.colab import output
 from ipywidgets import widgets
 from note_seq.audio_io import wav_data_to_samples_pydub
@@ -6,7 +7,7 @@ from traitlets import traitlets
 from IPython.display import display, Javascript
 
 
-def record(seconds=3, sample_rate=16000, normalize_db=0.1):
+def record(num_seconds=3, sample_rate=16000, normalize_db=0.1):
     """
     Record audio via microphone with Javascript
     Based on https://github.com/magenta/ddsp/blob/main/ddsp/colab/colab_utils.py
@@ -34,21 +35,24 @@ def record(seconds=3, sample_rate=16000, normalize_db=0.1):
     })
     """
 
-    print('Starting recording for {} seconds...'.format(seconds))
+    print('Начинается запись на {} секунды...'.format(num_seconds))
     display(Javascript(record_js_code))
-    audio_string = output.eval_js('record(%d)' % (seconds * 1000.0))
-    print(audio_string)
-    print('Finished recording!')
+    audio_string = output.eval_js('record(%d)' % (num_seconds * 1000.0))
+    print('Запись окончена!')
     audio_bytes = base64.b64decode(audio_string.split(',')[1])
-    return wav_data_to_samples_pydub(wav_data=audio_bytes, sample_rate=sample_rate,
-                                     normalize_db=normalize_db, num_channels=1)
+    audio = wav_data_to_samples_pydub(wav_data=audio_bytes, sample_rate=sample_rate,
+                                      normalize_db=normalize_db, num_channels=1)
+    return torch.from_numpy(audio)
 
 
-class LoadedButton(widgets.Button):
-    def __init__(self, audio=None, *args, **kwargs):
+class AudioButton(widgets.Button):
+    def __init__(self, num_second, sample_rate, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_traits(audio=traitlets.Any(audio))
+        self.add_traits(audio=traitlets.Any(None))
+        self.add_traits(num_seconds=traitlets.Any(num_second))
+        self.add_traits(sample_rate=traitlets.Any(sample_rate))
 
 
 def record_audio(button):
-    button.audio = record()
+    button.audio = record(num_seconds=button.num_seconds,
+                          sample_rate=button.sample_rate)
