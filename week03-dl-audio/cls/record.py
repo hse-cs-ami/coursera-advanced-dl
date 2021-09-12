@@ -46,10 +46,10 @@ def record(num_seconds=3, sample_rate=16000, normalize_db=0.1):
 
 
 class AudioButton(widgets.Button):
-    def __init__(self, num_second, sample_rate, *args, **kwargs):
+    def __init__(self, num_seconds, sample_rate, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_traits(audio=traitlets.Any(None))
-        self.add_traits(num_seconds=traitlets.Any(num_second))
+        self.add_traits(num_seconds=traitlets.Any(num_seconds))
         self.add_traits(sample_rate=traitlets.Any(sample_rate))
 
 
