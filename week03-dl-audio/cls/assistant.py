@@ -9,9 +9,10 @@ class VoiceAssistant(object):
     label_to_class = ['BOOK', 'EAT', 'JOKE', 'MOTIVATE', 'PRAISE']
     sample_rate = 48000
 
-    def __init__(self, cls_model, spectrogramer):
+    def __init__(self, cls_model, spectrogramer, device):
         self.cls_model = cls_model.eval()
         self.spectrogramer = spectrogramer
+        self.device = device
 
         self.answers = [[]] * len(self.label_to_class)
         for i, class_name in enumerate(self.label_to_class):
@@ -24,8 +25,8 @@ class VoiceAssistant(object):
 
     def answer(self, waveform):
         with torch.no_grad():
-            spec = self.spectrogramer(waveform.unsqueeze(0))
-            logits = self.cls_model(spec).squeeze(0)
+            spec = self.spectrogramer(waveform.to(self.device).unsqueeze(0))
+            logits = self.cls_model(spec).cpu().squeeze(0)
             label = torch.argmax(logits).item()
 
         return random.choice(self.answers[label])
