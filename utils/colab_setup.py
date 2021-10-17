@@ -55,9 +55,10 @@ class Audio(WeekSetup):
 
         download_github_raw(os.path.join('week03-dl-audio', 'data', 'audio-dataset.zip'))
         download_github_raw(os.path.join('week03-dl-audio', 'data', 'asr-model.pt.zip'))
+        download_github_raw(os.path.join('week03-dl-audio', 'data', 'voice-assistant.zip'))
 
     def setup(self):
-        os.system('pip install torchaudio editdistance note_seq')
+        os.system('pip install torchaudio editdistance note_seq pydub')
         if os.path.isdir('audio-dataset'):
             shutil.rmtree('audio-dataset')
 
@@ -70,3 +71,10 @@ class Audio(WeekSetup):
         with ZipFile('asr-model.pt.zip', 'r') as zip_ref:
             zip_ref.extractall()
         os.remove('asr-model.pt.zip')
+
+        if os.path.isdir('voice-assistant'):
+            shutil.rmtree('voice-assistant')
+
+        with ZipFile('voice-assistant.zip', 'r') as zip_ref:
+            zip_ref.extractall()
+        os.remove('voice-assistant.zip')
