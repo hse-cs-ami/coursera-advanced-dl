@@ -1,11 +1,13 @@
 import os
 import random
 import torch
+import numpy as np
 from pydub import AudioSegment
 
 
 class VoiceAssistant(object):
     label_to_class = ['BOOK', 'EAT', 'JOKE', 'MOTIVATE', 'PRAISE']
+    sample_rate = 48000
 
     def __init__(self, cls_model, spectrogramer):
         self.cls_model = cls_model.eval()
@@ -16,7 +18,9 @@ class VoiceAssistant(object):
             files = os.listdir(os.path.join('voice-assistant', class_name))
             for file_name in files:
                 file_path = os.path.join('voice-assistant', class_name, file_name)
-                self.answers[i] += [AudioSegment.from_file(file_path)]
+                audio = AudioSegment.from_file(file_path)
+                audio = np.array(audio.get_array_of_samples())
+                self.answers[i] += [audio]
 
     def answer(self, waveform):
         with torch.no_grad():

@@ -40,8 +40,7 @@ def record(num_seconds=3, sample_rate=16000, normalize_db=0.1):
     audio_string = output.eval_js('record(%d)' % (num_seconds * 1000.0))
     print('Запись окончена!')
     audio_bytes = base64.b64decode(audio_string.split(',')[1])
-    audio = wav_data_to_samples_pydub(wav_data=audio_bytes, sample_rate=sample_rate,
-                                      normalize_db=normalize_db, num_channels=1)
+    audio = wav_data_to_samples_pydub(wav_data=audio_bytes, sample_rate=sample_rate, num_channels=1)
     return torch.from_numpy(audio)
 
 
