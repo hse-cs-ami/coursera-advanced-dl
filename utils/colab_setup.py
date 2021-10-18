@@ -37,6 +37,17 @@ class WeekSetup(ABC):
         pass
 
 
+class Week01CV(WeekSetup):
+
+    def __init__(self):
+        super().__init__()
+        self.dataset_name = 'birbs.tar.gz'
+
+    def setup(self):
+        download_github_release('dataset/' + self.dataset_name)
+        os.system(f'tar -xf {self.dataset_name}')
+
+
 class Week02GAN(WeekSetup):
 
     def __init__(self):
