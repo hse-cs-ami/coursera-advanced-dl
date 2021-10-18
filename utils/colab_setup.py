@@ -1,15 +1,16 @@
 import os
 import shutil
-from zipfile import ZipFile
 from abc import ABC
 from abc import abstractmethod
+from zipfile import ZipFile
 
 
 def download_github_code(path):
     filename = path.rsplit('/')[-1]
     os.system('shred -u {}'.format(filename))
     os.system(
-        'wget -q https://raw.githubusercontent.com/hse-cs-ami/coursera-advanced-dl/main/{} -O {}'.format(path, filename))
+        'wget -q https://raw.githubusercontent.com/hse-cs-ami/coursera-advanced-dl/main/{} -O {}'.format(path,
+                                                                                                         filename))
 
 
 def download_github_release(path):
@@ -27,6 +28,7 @@ def download_github_raw(path):
 
 
 class WeekSetup(ABC):
+
     def __init__(self):
         download_github_code('utils/testing.py')
 
@@ -35,15 +37,30 @@ class WeekSetup(ABC):
         pass
 
 
+class Week02GAN(WeekSetup):
+
+    def __init__(self):
+        super().__init__()
+        self.dataset_name = 'birbs.tar.gz'
+
+    def setup(self):
+        download_github_release('dataset/' + self.dataset_name)
+        os.system(f'tar -xf {self.dataset_name}')
+        os.remove(self.dataset_name)
+
+
 class Audio(WeekSetup):
+
     def __init__(self):
         super().__init__()
         if os.path.isdir('week03'):
             shutil.rmtree('week03')
 
         os.mkdir('week03')
-        code_base = {'asr': ['alphabet.py', 'metrics.py', 'model.py'],
-                     'cls': ['dataset.py', 'record.py', 'assistant.py']}
+        code_base = {
+            'asr': ['alphabet.py', 'metrics.py', 'model.py'],
+            'cls': ['dataset.py', 'record.py', 'assistant.py']
+        }
 
         for code_dir, files in code_base.items():
             os.mkdir(os.path.join('week03', code_dir))
