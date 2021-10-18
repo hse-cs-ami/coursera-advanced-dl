@@ -13,15 +13,16 @@ class VoiceAssistant(object):
         self.cls_model = cls_model.eval()
         self.spectrogramer = spectrogramer
         self.device = device
+        self.answers = []
 
-        self.answers = [[]] * len(self.label_to_class)
         for i, class_name in enumerate(self.label_to_class):
+            self.answers.append([])
             files = os.listdir(os.path.join('voice-assistant', class_name))
             for file_name in files:
                 file_path = os.path.join('voice-assistant', class_name, file_name)
                 audio = AudioSegment.from_file(file_path)
                 audio = np.array(audio.get_array_of_samples())
-                self.answers[i] += [audio]
+                self.answers[i].append(audio)
 
     def answer(self, waveform):
         with torch.no_grad():
