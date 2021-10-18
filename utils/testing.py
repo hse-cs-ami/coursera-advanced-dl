@@ -1,6 +1,6 @@
 import json
-
 import requests
+import torch
 
 
 class Grader:
@@ -69,7 +69,28 @@ class TestWeek02(Tester):
 
 
 class TestWeek03(Tester):
-    pass
+
+    def test01(self, model_class):
+        pass
+        # TODO: test model output shape
+
+    def test02(self, cls_model, spectrogramer, test_loader, device):
+        accuracy = 0.0
+        for waveforms, labels in test_loader:
+            waveforms, labels = waveforms.to(device), labels.to(device)
+
+            with torch.no_grad():
+                specs = spectrogramer(waveforms)
+                logits = cls_model(specs)
+
+            accuracy += (logits.argmax(dim=1) == labels).sum().item()
+
+        accuracy /= len(test_loader.dataset)
+        # TODO: test accuracy value
+
+    def test03(self, cer, wer):
+        pass
+        # TODO: test cer and wer values
 
 
 class TestWeek04(Tester):
