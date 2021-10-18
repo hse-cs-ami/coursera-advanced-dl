@@ -7,7 +7,7 @@ from traitlets import traitlets
 from IPython.display import display, Javascript
 
 
-def record(num_seconds=3, sample_rate=16000, normalize_db=0.1, eps_seconds=0.5):
+def record(num_seconds=3, sample_rate=16000, normalize_db=0.1, eps_seconds=0.7):
     """
     Record audio via microphone with Javascript
     Based on https://github.com/magenta/ddsp/blob/main/ddsp/colab/colab_utils.py
