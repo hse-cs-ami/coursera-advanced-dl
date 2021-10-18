@@ -5,10 +5,10 @@ import requests
 
 class Grader:
 
-    def __init__(self, assignment_key, all_parts=()):
+    def __init__(self, assignment_key, parts=()):
         self.submission_page = 'https://www.coursera.org/api/onDemandProgrammingScriptSubmissions.v1'
         self.assignment_key = assignment_key
-        self.answers = {part: None for part in all_parts}
+        self.answers = {part: None for part in parts}
 
     def submit(self, email, token):
         submission = {
@@ -47,10 +47,11 @@ class Grader:
 
 class Tester:
 
-    def __init__(self, assignment_key, all_parts=()):
-        self.grader: Grader = Grader(assignment_key=assignment_key, all_parts=all_parts)
+    def __init__(self, assignment_key, parts=()):
+        self.grader: Grader = Grader(assignment_key=assignment_key, parts=parts)
         self.email: str = ''
         self.token: str = ''
+        self.parts = parts
 
     def set_email(self, email: str):
         self.email = email
