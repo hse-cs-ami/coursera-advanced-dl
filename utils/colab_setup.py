@@ -7,7 +7,7 @@ from zipfile import ZipFile
 
 def download_github_code(path):
     filename = path.rsplit('/')[-1]
-    os.system('shred -u {}'.format(filename))
+    os.system('rm {}'.format(filename))
     os.system(
         'wget -q https://raw.githubusercontent.com/hse-cs-ami/coursera-advanced-dl/main/{} -O {}'.format(path,
                                                                                                          filename))
@@ -15,14 +15,14 @@ def download_github_code(path):
 
 def download_github_release(path):
     filename = path.rsplit('/')[-1]
-    os.system('shred -u {}'.format(filename))
+    os.system('rm {}'.format(filename))
     os.system(
         'wget -q https://github.com/hse-cs-ami/coursera-advanced-dl/releases/download/{} -O {}'.format(path, filename))
 
 
 def download_github_raw(path):
     filename = path.rsplit('/')[-1]
-    os.system('shred -u {}'.format(filename))
+    os.system('rm {}'.format(filename))
     os.system(
         'wget -q https://github.com/hse-cs-ami/coursera-advanced-dl/blob/main/{}?raw=true -O {}'.format(path, filename))
 
