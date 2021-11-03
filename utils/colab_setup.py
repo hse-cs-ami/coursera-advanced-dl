@@ -44,6 +44,7 @@ class Week01CV(WeekSetup):
         self.dataset_name = 'birbs.tar.gz'
 
     def setup(self):
+        download_github_code(os.path.join('week01-cv', 'utils.py'))
         download_github_release('dataset/' + self.dataset_name)
         os.system(f'tar -xf {self.dataset_name}')
 
