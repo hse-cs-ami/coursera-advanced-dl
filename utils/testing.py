@@ -1,4 +1,5 @@
 import json
+
 import requests
 import torch
 
@@ -64,8 +65,28 @@ class TestWeek01(Tester):
     pass
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 class TestWeek02(Tester):
-    pass
+
+    def test01(self, generator_class):
+        self.grader.set_answer(self.parts[0], count_parameters(generator_class(231)))
+        self.grader.submit(self.email, self.token)
+
+    def test02(self, discriminator_class):
+        self.grader.set_answer(self.parts[1], count_parameters(discriminator_class(231)))
+        self.grader.submit(self.email, self.token)
+
+    def test03(self, wrapper):
+        answer = [
+            len(wrapper.history['test_loss']),
+            wrapper.history['generator_loss'][-1].item(),
+            wrapper.history['discriminator_loss'][-1].item(),
+        ]
+        self.grader.set_answer(self.parts[2], answer)
+        self.grader.submit(self.email, self.token)
 
 
 class TestWeek03(Tester):
